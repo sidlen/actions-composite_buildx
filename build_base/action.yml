@@ -54,8 +54,8 @@ runs:
         else
           IMAGE_TAG="${REF#refs/heads/}"
         fi
-        echo "::set-output name=IMAGE_TAG::${IMAGE_TAG}"
-        echo "::set-output name=SERVER_URL::${SERVER_URL#https://}"
+        echo "::set-output name=image_tag::${IMAGE_TAG}"
+        echo "::set-output name=server_url::${SERVER_URL#https://}"
     - name: Checkout
       uses: actions/checkout@v4
 
@@ -65,7 +65,7 @@ runs:
         echo DEBUG
         echo "IMAGE_TAG=${{ steps.prepare.outputs.image_tag }}"
         echo "SERVER_URL=${{ steps.prepare.outputs.server_url }}"
-        echo "IMAGE_FULL_NAME=${{ steps.prepare.outputs.image_full_name }}"
+        echo "IMAGE_FULL_NAME=${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ steps.prepare.outputs.IMAGE_TAG }}"
         echo DEBUG
 
     - name: Setup Docker Buildx
