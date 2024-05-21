@@ -89,6 +89,12 @@ runs:
         target: ${{ inputs.dockerfile_target }}
 
 outputs:
-  image_tag: ${{ steps.prepare.outputs.IMAGE_TAG }}
-  server_url: ${{ steps.prepare.outputs.SERVER_URL }}
-  image_full_name: ${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ steps.prepare.outputs.IMAGE_TAG }}
+  image_tag:
+    description: "The tag of the built image"
+    value: ${{ steps.prepare.outputs.image_tag }}
+  server_url:
+    description: "The server URL without protocol"
+    value: ${{ steps.prepare.outputs.server_url }}
+  image_full_name:
+    description: "Full name of the built image"
+    value: ${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ steps.prepare.outputs.IMAGE_TAG }}
