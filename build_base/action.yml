@@ -116,7 +116,8 @@ runs:
         context: ${{ inputs.context }}
         push: true
         tags: ${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ steps.prepare.outputs.IMAGE_TAG }}
-        build-args: ${{ inputs.build_args }}
+        build-args: |
+          ${{ inputs.build_args }}
         cache-from: type=registry,ref=${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ steps.prepare.outputs.IMAGE_TAG }}
         target: ${{ inputs.dockerfile_target }}
 
