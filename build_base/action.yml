@@ -5,10 +5,6 @@ inputs:
   image_name:
     description: 'Image name (short name)'
     required: true
-  use_latest_tag:
-    description: 'if true: set tag to latest'
-    required: false
-    default: 'false'
   dockerfile:
     description: 'path to dockerfile relative to project directory'
     required: true
@@ -62,7 +58,7 @@ runs:
         IFS=' ' read -r -a values <<< "${{ inputs.list_tags }}"
         LIST_FULL_IMAGE_TAGS=${IMAGE_FULL_NAME}
         for value in "${values[@]}"; do
-          LIST_FULL_IMAGE_TAGS="$LIST_FULL_IMAGE_TAGS ${SERVER_URL#https://}/${{ github.repository_owner }}/${{ inputs.image_name }}:$value"
+          LIST_FULL_IMAGE_TAGS="$LIST_FULL_IMAGE_TAGS,${SERVER_URL#https://}/${{ github.repository_owner }}/${{ inputs.image_name }}:$value"
         done
         echo "::set-output name=list_full_image_tags::${LIST_FULL_IMAGE_TAGS}"
 
