@@ -38,6 +38,10 @@ inputs:
     description: 'dockerhub password'
     required: true
     default: ${{ secrets.DOCKER_HUB_USER_PASSWORD }}
+  list_tags:
+    description: "list of tags to create images"
+    required: false
+    default: ""
 
 runs:
   using: 'composite'
@@ -50,15 +54,17 @@ runs:
         SERVER_URL="${{ github.server_url }}"
         REF_NAME="${{ github.ref }}"
         REF="${REF_NAME#refs/tags/}"
-        if [ "${{ inputs.use_latest_tag }}" = "true" ]; then
-          IMAGE_TAG="latest"
-        else
-          IMAGE_TAG="${REF#refs/heads/}"
-        fi
+        IMAGE_TAG="${REF#refs/heads/}"
         echo "::set-output name=image_tag::${IMAGE_TAG}"
         echo "::set-output name=server_url::${SERVER_URL#https://}"
         IMAGE_FULL_NAME="${SERVER_URL#https://}/${{ github.repository_owner }}/${{ inputs.image_name }}:${IMAGE_TAG}"
         echo "::set-output name=image_full_name::${IMAGE_FULL_NAME}"
+        IFS=' ' read -r -a values <<< "${{ inputs.list_tags }}"
+        LIST_FULL_IMAGE_TAGS=${IMAGE_FULL_NAME}
+        for value in "${values[@]}"; do
+          LIST_FULL_IMAGE_TAGS="$LIST_FULL_IMAGE_TAGS ${SERVER_URL#https://}/${{ github.repository_owner }}/${{ inputs.image_name }}:$value"
+        done
+        echo "::set-output name=list_full_image_tags::${LIST_FULL_IMAGE_TAGS}"
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -87,10 +93,11 @@ runs:
         file: ${{ inputs.dockerfile }}
         context: ${{ inputs.context }}
         push: true
-        tags: ${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ steps.prepare.outputs.IMAGE_TAG }}
+        tags: |
+          ${{ steps.prepare.outputs.list_full_image_tags }}
         build-args: |
           ${{ inputs.build_args }}
-        cache-from: type=registry,ref=${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ steps.prepare.outputs.IMAGE_TAG }}
+        cache-from: type=registry,ref=${{ steps.prepare.outputs.list_full_image_tags }}
         target: ${{ inputs.dockerfile_target }}
 
 outputs:
