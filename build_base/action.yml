@@ -101,4 +101,4 @@ outputs:
     value: ${{ steps.prepare.outputs.server_url }}
   image_full_name:
     description: "Full name of the built image"
-    value: ${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.ref_name }}
+    value: ${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository }}/${{ inputs.image_name }}:${{ github.ref_name }}
