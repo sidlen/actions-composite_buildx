@@ -46,21 +46,16 @@ runs:
       shell: bash
       id: prepare
       run: |
-        set -x  # Включаем трассировку для отладки
         SERVER_URL="${{ github.server_url }}"
-        REF_NAME="${{ github.ref }}"
-        REF="${REF_NAME#refs/tags/}"
-        IMAGE_TAG="${REF#refs/heads/}"
-        echo "::set-output name=image_tag::${IMAGE_TAG}"
         echo "::set-output name=server_url::${SERVER_URL#https://}"
-        IMAGE_FULL_NAME="${SERVER_URL#https://}/${{ github.repository_owner }}/${{ inputs.image_name }}:${IMAGE_TAG}"
+        IMAGE_FULL_NAME="${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:${{ github.ref_name }}"
         echo "::set-output name=image_full_name::${IMAGE_FULL_NAME}"
         IFS=' ' read -r -a values <<< "${{ inputs.list_tags }}"
         LIST_FULL_IMAGE_TAGS=${IMAGE_FULL_NAME}
         LIST_CACHE="type=registry,ref=${IMAGE_FULL_NAME}"
         for value in "${values[@]}"; do
-          LIST_FULL_IMAGE_TAGS="$LIST_FULL_IMAGE_TAGS,${SERVER_URL#https://}/${{ github.repository_owner }}/${{ inputs.image_name }}:$value"
-          LIST_CACHE="$LIST_CACHE type=registry,ref=${SERVER_URL#https://}/${{ github.repository_owner }}/${{ inputs.image_name }}:$value"
+          LIST_FULL_IMAGE_TAGS="$LIST_FULL_IMAGE_TAGS,${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
+          LIST_CACHE="$LIST_CACHE type=registry,ref=${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
         done
         echo "::set-output name=list_full_image_tags::${LIST_FULL_IMAGE_TAGS}"
         echo "::set-output name=list_cache::${LIST_CACHE}"
@@ -101,12 +96,9 @@ runs:
         target: ${{ inputs.dockerfile_target }}
 
 outputs:
-  image_tag:
-    description: "The tag of the built image"
-    value: ${{ steps.prepare.outputs.image_tag }}
   server_url:
     description: "The server URL without protocol"
     value: ${{ steps.prepare.outputs.server_url }}
   image_full_name:
     description: "Full name of the built image"
-    value: ${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ steps.prepare.outputs.IMAGE_TAG }}
+    value: ${{ steps.prepare.outputs.SERVER_URL }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.ref_name }}
