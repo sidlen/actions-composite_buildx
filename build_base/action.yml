@@ -47,7 +47,7 @@ runs:
         LIST_CACHE="type=registry,ref=${IMAGE_FULL_NAME}"
         for value in "${values[@]}"; do
           LIST_FULL_IMAGE_TAGS="$LIST_FULL_IMAGE_TAGS,${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
-          LIST_CACHE="$LIST_CACHE type=registry,ref=${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
+          LIST_CACHE="$LIST_CACHE;type=registry,ref=${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
         done
         echo "::set-output name=list_full_image_tags::${LIST_FULL_IMAGE_TAGS}"
         echo "::set-output name=list_cache::${LIST_CACHE}"
@@ -75,8 +75,7 @@ runs:
           ${{ steps.prepare.outputs.list_full_image_tags }}
         build-args: |
           ${{ inputs.build_args }}
-        cache-from: |
-          ${{ steps.prepare.outputs.list_cache }}
+        cache-from: ${{ steps.prepare.outputs.list_cache }}
         target: ${{ inputs.dockerfile_target }}
 
 outputs:
