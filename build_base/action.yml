@@ -50,16 +50,13 @@ runs:
           LIST_CACHE+=$'\n'"type=registry,ref=${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
         done
         echo "::set-output name=list_full_image_tags::${LIST_FULL_IMAGE_TAGS}"
-        echo $LIST_CACHE >> "$GITEA_ENV"
+        LIST_CACHE="${LIST_CACHE//$'\n'/'%0A'}"
         echo "::set-output name=list_cache::${LIST_CACHE}"
 
     - name: debug
       shell: bash
       run: |
-        echo DEGUB
-        echo "$GITEA_ENV"
-        echo DEBUG_LIST
-        echo "$LIST_CACHE"
+        echo "image_full_name: ${{ steps.prepare.outputs.list_cache }}"
 
     - name: Checkout
       uses: actions/checkout@v4.1.2
@@ -85,7 +82,7 @@ runs:
         build-args: |
           ${{ inputs.build_args }}
         cache-from: |
-          $LIST_CACHE
+          ${{ steps.prepare.outputs.list_cache }}
         target: ${{ inputs.dockerfile_target }}
 
 outputs:
