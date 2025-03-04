@@ -83,6 +83,8 @@ runs:
           ${{ inputs.build_args }}
         cache-from: |
           ${{ steps.prepare.outputs.list_cache }}
+        cache-to: |
+          ${{ steps.prepare.outputs.list_cache }}
         target: ${{ inputs.dockerfile_target }}
 
 outputs:
