@@ -38,6 +38,10 @@ inputs:
     description: "list of tags to create images"
     required: false
     default: ""
+  cache_tag:
+    description: "tag name for cache"
+    required: false
+    default: "ci-cache"
 
 runs:
   using: 'composite'
@@ -52,35 +56,36 @@ runs:
         echo "::set-output name=image_full_name::${IMAGE_FULL_NAME}"
         IFS=' ' read -r -a values <<< "${{ inputs.list_tags }}"
         LIST_FULL_IMAGE_TAGS=${IMAGE_FULL_NAME}
-        LIST_CACHE="type=registry,ref=${IMAGE_FULL_NAME}"
+        CACHE_TO="mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:${{ inputs.cache_tag }}"
+        CACHE_FROM="type=registry,ref=${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:${{ inputs.cache_tag }}"
         for value in "${values[@]}"; do
           LIST_FULL_IMAGE_TAGS="$LIST_FULL_IMAGE_TAGS,${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
-          LIST_CACHE="$LIST_CACHE type=registry,ref=${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
         done
         echo "::set-output name=list_full_image_tags::${LIST_FULL_IMAGE_TAGS}"
-        echo "::set-output name=list_cache::${LIST_CACHE}"
+        echo "::set-output name=cache_to::${CACHE_TO}"
+        echo "::set-output name=cache_from::${CACHE_FROM}"
 
     - name: Checkout
       uses: actions/checkout@v4.1.2
 
     - name: Setup Docker Buildx
-      uses: docker/setup-buildx-action@v3.6.1
+      uses: docker/setup-buildx-action@v3.10.0
 
     - name: Login to Docker Registry
-      uses: docker/login-action@v3.1.0
+      uses: docker/login-action@v3.3.0
       with:
         registry: ${{ steps.prepare.outputs.SERVER_URL }}
         username: ${{ inputs.docker_login }}
         password: ${{ inputs.docker_password}}
 
     - name: Login to Docker Registry
-      uses: docker/login-action@v3.1.0
+      uses: docker/login-action@v3.3.0
       with:
         username: ${{ inputs.dockerhub_login }}
         password: ${{ inputs.dockerhub_password }}
 
     - name: Build and push
-      uses: docker/build-push-action@v5.3.0
+      uses: docker/build-push-action@v6.15.0
       with:
         file: ${{ inputs.dockerfile }}
         context: ${{ inputs.context }}
@@ -89,9 +94,10 @@ runs:
           ${{ steps.prepare.outputs.list_full_image_tags }}
         build-args: |
           ${{ inputs.build_args }}
-        cache-from: |
-          ${{ steps.prepare.outputs.list_cache }}
+        cache-from: ${{ steps.prepare.outputs.cache_from }}
+        cache-to: ${{ steps.prepare.outputs.cache_to }}
         target: ${{ inputs.dockerfile_target }}
+        provenance: 'false'
 
 outputs:
   server_url:
