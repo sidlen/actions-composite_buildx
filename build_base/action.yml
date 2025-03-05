@@ -49,8 +49,10 @@ runs:
         for value in "${values[@]}"; do
           LIST_FULL_IMAGE_TAGS="$LIST_FULL_IMAGE_TAGS,${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
           LIST_CACHE+=$'\n'"type=registry,ref=${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
+          LIST_CACHE_TO+=$'\n'"mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${SERVER_URL#https://}/${{ github.repository }}/${{ inputs.image_name }}:$value"
         done
         echo "::set-output name=list_full_image_tags::${LIST_FULL_IMAGE_TAGS}"
+        LIST_CACHE_TO="${LIST_CACHE//$'\n'/'%0A'}"
         echo "::set-output name=list_cache_to::${LIST_CACHE_TO}"
         LIST_CACHE="${LIST_CACHE//$'\n'/'%0A'}"
         echo "::set-output name=list_cache::${LIST_CACHE}"
