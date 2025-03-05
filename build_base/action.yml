@@ -55,11 +55,6 @@ runs:
         LIST_CACHE="${LIST_CACHE//$'\n'/'%0A'}"
         echo "::set-output name=list_cache::${LIST_CACHE}"
 
-    - name: debug
-      shell: bash
-      run: |
-        echo "image_full_name: ${{ steps.prepare.outputs.list_cache }}"
-
     - name: Checkout
       uses: actions/checkout@v4.1.2
 
