@@ -92,8 +92,6 @@ runs:
           ${{ steps.prepare.outputs.list_full_image_tags }}
         build-args: |
           ${{ inputs.build_args }}
-        cache-from: ${{ steps.prepare.outputs.cache_from }}
-        cache-to: ${{ steps.prepare.outputs.cache_to }}
         target: ${{ inputs.dockerfile_target }}
         provenance: 'false'
 
